@@ -5,7 +5,7 @@ Raccolta di programmi riguardanti in qualche modo l'elettricità:
  - Calcolo tariffe EnelX ([pagina](https://jumpjack.altervista.org/elettrospesometro/enelx.html)) (javascript)
  - Grafico colonnine di ricarica ([pagina](http://jumpjack.altervista.org/colonnine/grafico.html)) (javascript)
  - Grafico incentivi auto elettriche ([pagina](https://programmi.hostingerapp.com/logger-incentivi.php), [grafico](https://datawrapper.dwcdn.net/QSK4r/15/)) - abbandonato (php)
- - Analizzatore consumi Enel Energia  (javascript) (da aggiungere)
+ - Analizzatore consumi tramite sito Enel Energia  (javascript) ([pagina su github](https://github.com/jumpjack/electric-sources/blob/main/enel-analyzer.html))
  - Analizzatore output Voltcraft EL3500/EL4000 (da aggiungere)
  - Dimensionamento pannelli fotovoltaici ([pagina](https://jumpjack.altervista.org/pannelli/dimensionamento.html))  (javascript)
  
