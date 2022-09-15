@@ -36,7 +36,7 @@ Euro/kWh: <input type="text" id="euk" name="euk" value = "0.30"><br>
 
 <br>
 
- 
+
 
 Grafico: <button onclick="aggiorna()">Aggiorna</button><br>
 
@@ -46,7 +46,7 @@ Grafico: <button onclick="aggiorna()">Aggiorna</button><br>
 
 Minimo: <span id="spn_minimo" name="spn_minimo"></span><br>
 
- 
+
 
 Medio: <input type="text" id="spn_medio" name="spn_medio"></span> -
 
@@ -60,9 +60,9 @@ Euro stimati (Giorno/Mese/Anno) <span id="spn_costoGmed" name="spn_costoGmed"></
 
 Massimo:<span id="spn_massimo" name="spn_massimo"></span><br>
 
- 
 
- 
+
+
 
 Totale: <span id="spn_totale" name="spn_totale"></span> -
 
@@ -72,9 +72,9 @@ M: <span id="spn_costoMtot" name="spn_costoMtot"></span>,
 
 A: <span id="spn_costoAtot" name="spn_costoAtot"></span><br>
 
- 
 
- 
+
+
 
 <br>
 
@@ -92,7 +92,7 @@ Il link risulta attivo solo dopo che hai effettuato l'accesso alla tua area clie
 
 Link di esempio:<br>
 
-https://www.enel.it/bin/areaclienti/auth/aggregateConsumption?pod=CODICE_POD&userNumber=NUMERO_UTENZA&validityFrom=INIZIO(GGMMAAA)&validityTo=FINE(GGMMAAA)&_=TIMESTAMP<br>
+https://www.enel.it/bin/areaclienti/auth/aggregateConsumption?pod=CODICE_POD&userNumber=NUMERO_UTENZA&validityFrom=INIZIO(GGMMAAAA)&validityTo=FINE(GGMMAAAA)&_=TIMESTAMP<br>
 
 <br>
 
@@ -102,9 +102,9 @@ Codice POD:<input type="text" id="POD" name="POD"><br>
 
 Utenza:<input type="text" id="utente" name="utente"><br>
 
-Data inizio (GGMMAAA):<input type="text" id="inizio" name="inizio" value = "01012022"><br>
+Data inizio (GGMMAAAA):<input type="text" id="inizio" name="inizio" value = "01012022"><br>
 
-Data fine (GGMMAAA):<input type="text" id="fine" name="fine" value = "13092022"><br>
+Data fine (GGMMAAAA):<input type="text" id="fine" name="fine" value = "13092022"><br>
 
 <button onclick="creaLink()">Crea</button><br>
 
@@ -114,7 +114,7 @@ Link: <span id = "mylink" name="mylink"></span><br>
 
 const myLabels = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23];
 
- 
+
 
 myConfig = {
 
@@ -154,15 +154,15 @@ myConfig = {
 
 }
 
- 
 
- 
+
+
 
 const ctx = document.getElementById('myChart').getContext('2d');
 
- 
 
- 
+
+
 
 function elabora() {
 
@@ -188,7 +188,7 @@ function elabora() {
 
 });
 
- 
+
 
 daysData = JSONdata.data.aggregationResult.aggregations[0].results;
 
@@ -198,11 +198,11 @@ console.log(JSONdata.data.aggregationResult.aggregations[1].referenceID, JSONdat
 
 myChart = new Chart(ctx, myConfig)
 
- 
+
 
 }
 
- 
+
 
 function creaLink() {
 
@@ -230,7 +230,7 @@ function creaLink() {
 
 }
 
- 
+
 
 function convertiDataRichiesta(d) {
 
@@ -244,7 +244,7 @@ function convertiDataRichiesta(d) {
 
 }
 
- 
+
 
 function aggiorna() {
 
@@ -258,7 +258,7 @@ function aggiorna() {
 
     return -2;
 
-  } 
+  }
 
   dayDataRaw = daysData[numeroPerData];
 
@@ -288,7 +288,7 @@ function aggiorna() {
 
     if (objVal.value < minimo) minimo = objVal.value;
 
-   
+
 
   });
 
@@ -304,7 +304,7 @@ function aggiorna() {
 
   myChart.update();
 
- 
+
 
   spn_minimo.innerHTML = minimo.toFixed(2);
 
@@ -318,23 +318,23 @@ function aggiorna() {
 
   spn_costoGtot.innerHTML = costoG_daTotale.toFixed(2);
 
- 
+
 
   spn_costoMmed.innerHTML = costoM_daMedio.toFixed(2);
 
   spn_costoMtot.innerHTML = costoM_daTotale.toFixed(2);
 
- 
+
 
   spn_costoAmed.innerHTML = costoA_daMedio.toFixed(2);
 
   spn_costoAtot.innerHTML = costoA_daTotale.toFixed(2);
 
- 
+
 
 }
 
- 
+
 
 function calcolaCosti(medio, totale) {
 
@@ -342,25 +342,25 @@ function calcolaCosti(medio, totale) {
 
   costoG_daTotale = totale * euk.value;
 
- 
+
 
   costoM_daMedio = costoG_daMedio*30;
 
   costoM_daTotale = costoG_daTotale*30;
 
- 
+
 
   costoA_daMedio = costoG_daMedio*365;
 
   costoA_daTotale = costoG_daTotale*365;
 
- 
 
-console.log(costoG_daMedio, costoG_daTotale, costoM_daMedio); 
+
+console.log(costoG_daMedio, costoG_daTotale, costoM_daMedio);
 
 }
 
- 
+
 
 function ricalcola() {
 
@@ -370,13 +370,13 @@ function ricalcola() {
 
   spn_costoGtot.innerHTML = costoG_daTotale.toFixed(2);
 
- 
+
 
   spn_costoMmed.innerHTML = costoM_daMedio.toFixed(2);
 
   spn_costoMtot.innerHTML = costoM_daTotale.toFixed(2);
 
- 
+
 
   spn_costoAmed.innerHTML = costoA_daMedio.toFixed(2);
 
@@ -384,7 +384,7 @@ function ricalcola() {
 
 }
 
- 
+
 
 function zeri(v) {
 
@@ -394,7 +394,7 @@ function zeri(v) {
 
 </script>
 
- 
+
 
   </body>
 
