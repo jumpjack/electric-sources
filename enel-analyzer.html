@@ -1,5 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
+<!--
+v. 1.0.0
+	Cambiato metodo di elaborazione da ciclo for a metodo map ==> aumento smodato di velocita' di elaborazione
+	Riordinata GUI tramite tabella
+	Aggiunta opzione per scaricare dati solari da PVGIS
+	Aggiunta funzione per sfogliare giorni/mesi/anni uno per volta
+	Migliorato output numerico
+
+v. 0.0.1: Prima versione pubblica
+-->
 	<head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<meta name="generator" content="PSPad editor, www.pspad.com">
@@ -7,7 +17,10 @@
 	</head>
 	<script src="Chart.bundle.js"></script>
 	<body>
-<h1>Visualizzatore consumi orari ENEL Energia</h1>
+<center><big><big><big>Visualizzatore consumi orari ENEL Energia</big></big></big><br>
+<i>Versione 1.0.0</i><br>
+<i>(Vedi anche il sito nazionale ufficiale "<a href="https://www.consumienergia.it/portaleConsumi/it/letture_e_consumi.page">Portale consumi</a>"</i>)<br>
+<i>Sorgenti: <a href="https://github.com/jumpjack/electric-sources/blob/main/enel-analyzer.html">link</a></i></center><br>
 <br>
 Incolla qui l'output del tuo link (*): <button onclick="inputData.value=''">Pulisci</button><br>
 <textarea id="inputData" name="inputData" cols = 100 rows = 5>
@@ -15,36 +28,67 @@ Incolla qui l'output del tuo link (*): <button onclick="inputData.value=''">Puli
 </textarea><br>
 <button onclick="elabora()">Elabora</button><br>
 <br>
-Dati per grafico:<br>
+Status: <span id="spnStatus" name="spnStatus"></span><br>
+<table border = 1>
+<tr>
+<td>
+Input<br>
 Giorno: <input type="number" id="giorno" name="giorno" value = "1"  onchange="aggiorna()"><br>
 Mese: <input type="number" id="mese" name="mese" value = "8" onchange="aggiorna()"><br>
 Anno: <input type="number" id="anno" name="anno" value = "2022"  onchange="aggiorna()"><br>
 Euro/kWh: <input type="text" id="euk" name="euk" value = "0.30"><br>
-Latitudine: <input type="text" id="lat" name="lat" value = "42"><br>
-Longitudine: <input type="text" id="lon" name="lon" value = "12"><br>
+<br>
+Output:<br>
+Minimo: <span id="spn_minimo" name="spn_minimo"></span><br>
+Medio: <input type="text" id="spn_medio" name="spn_medio"><br>
+Massimo:<span id="spn_massimo" name="spn_massimo"></span><br>
+Totale: <span id="spn_totale" name="spn_totale"></span> <br>
+<br>
+Costi stimati in base a consumo medio giornaliero:<br>
+Giorno: <span id="spn_costoGmed" name="spn_costoGmed"></span><br>
+Mese: <span id="spn_costoMmed" name="spn_costoMmed"></span><br>
+Anno: <span id="spn_costoAmed" name="spn_costoAmed"></span><br>
+<button onclick="ricalcola()">Ricalcola</button><br>
+<br>
+Costi reali:<br>
+Giorno selezionato: <span id="spn_costoGtot" name="spn_costoGtot"></span> <br>
+Periodo selezionato: <span id="spn_costoTotalePeriodo" name="spn_costoTotalePeriodo"></span> <br>
+Media periodo selezionato: <span id="spn_costoMedioPeriodo" name="spn_costoMedioPeriodo"></span> Euro/giorno<br>
+</td>
+<td>
+<button onclick="aggiorna()">Aggiorna</button><br>
+<canvas id="myChart" width="400" height="400"></canvas>
+</td>
+</tr>
+<tr>
+<td>
+Mostra dati solari (<a href="https://re.jrc.ec.europa.eu/pvg_tools/en/">Sito</a>):<br>
+Latitudine: <input type="text" id="spnLat" name="spnLat" value = "42"><br>
+Longitudine: <input type="text" id="spnLon" name="spnLon" value = "12"><br>
+Potenza (kWp): <input type="text" id="spnPotenza" name="spnPotenza" value = "3"><br>
+<!--
+Superficie: <input type="text" id="spnArea" name="spnArea" value = "30"><br>
+Efficienza (0-1): <input type="text" id="spnEff" name="spnEff" value = "0.2"><br>
+-->
+<button onclick="leggiDatiSolari()">Scarica</button><br>
+
+</td>
+<td>
+<textarea id="solarData" name="solarData" cols = 50 rows= 15></textarea>
+</td>
+</tr>
+</table>
 
 <br>
-Grafico: <button onclick="aggiorna()">Aggiorna</button><br>
-<canvas id="myChart" width="400" height="400"></canvas>
-<br>
-Minimo: <span id="spn_minimo" name="spn_minimo"></span><br>
-Medio: <input type="text" id="spn_medio" name="spn_medio"></span> -
-Euro stimati (Giorno/Mese/Anno) <span id="spn_costoGmed" name="spn_costoGmed"></span>/
-<span id="spn_costoMmed" name="spn_costoMmed"></span>
-/<span id="spn_costoAmed" name="spn_costoAmed"></span>
-<button onclick="ricalcola()">Ricalcola</button><br>
-Massimo:<span id="spn_massimo" name="spn_massimo"></span><br>
-Totale: <span id="spn_totale" name="spn_totale"></span> -
-G: <span id="spn_costoGtot" name="spn_costoGtot"></span>,
-M: <span id="spn_costoMtot" name="spn_costoMtot"></span>,
-A: <span id="spn_costoAtot" name="spn_costoAtot"></span><br>
+
+<!--Anno: <span id="spn_costoAtot" name="spn_costoAtot"></span><br>-->
 <br>
 Output da incollare in spreadsheet:<br>
 <textarea id="outputData" name="outputData" cols = 100 rows = 5></textarea><br>
 <br>
 
-Pagina per dimensionamento pannelli solari a isola: <a href="https://jumpjack.altervista.org/pannelli/dimensionamento.html">Link</a><br>
-"Tool fotovoltaico" ufficiale dell'Unione Europea: <a href="https://re.jrc.ec.europa.eu/pvg_tools/it/">Link</a><br>
+<li>Pagina per dimensionamento pannelli solari a isola: <a href="https://jumpjack.altervista.org/pannelli/dimensionamento.html">Link</a></li>
+<li>"Tool fotovoltaico" ufficiale dell'Unione Europea: <a href="https://re.jrc.ec.europa.eu/pvg_tools/it/">Link</a><br></li>
 Cliccando su "FV autonoma" si possono inserire i dati del proprio sistema con accumulo e scoprire per quanto tempo durerebbe una determinata batteria, data una determinata potenza dell'impianto:
 <img src="https://user-images.githubusercontent.com/1620953/191217769-885104a7-541b-485e-9e32-e45663f585f2.png"><br>
 <br>
@@ -133,22 +177,58 @@ myConfig = {
 const ctx = document.getElementById('myChart').getContext('2d');
 
 function elabora() {
+    periodTotalkWh = 0;
+    periodTotalsamples = 0;
+    spnStatus.innerHTML = "";
 	data = inputData.value;
 	JSONdata = JSON.parse(data);
 	hourData = JSONdata.data.aggregationResult.aggregations[0].results;
-	hourData.forEach( (datum) => {
-		hourValues = datum.binValues;
-		hourDate = datum.date;
-		dateSplit = hourDate.substr(0,2) + "/" + hourDate.substr(2,2) + "/" + hourDate.substr(4,4)
-		hourValues.forEach((subdatum) => {
-			outputData.value += dateSplit + " " + ((subdatum.name.substr(1,2)*1)-1) + ":00\t" + (subdatum.value+"").replace(".",",") + "\n";
-		});
+    appoggio = {data: hourData};
+	array1 = appoggio.data.map(obj => obj.binValues);
+	console.log(array1);
+	periodTotalkWh=0;
+    periodTotalsamples=0;
+	var mapped = appoggio.data.map(function(obj) {
+	//console.log(obj.binValues)
+		data = {d : obj.binValues};
+		var mapped2 = data.d.map(function(obj2) {
+	//console.log("o2=",obj2);
+	 	periodTotalkWh += obj2.value;
+        periodTotalsamples++;
+	 });
 	});
+console.log(periodTotalkWh	);
+
+/*
+		//	hourData.forEach( (datum) => {
+		for (var x = 0; x < hourData.length; x++) {
+	        datum = hourData[x];
+			hourValues = datum.binValues;
+			hourDate = datum.date;
+			dateSplit = hourDate.substr(0,2) + "/" + hourDate.substr(2,2) + "/" + hourDate.substr(4,4)
+			// hourValues.forEach((subdatum) => {
+			for (var i = 0; i < hourValues.length; i++) {
+				subdatum = hourValues[i];
+				outputData.value += dateSplit + " " + ((subdatum.name.substr(1,2)*1)-1) + ":00\t" + (subdatum.value+"").replace(".",",") + "\n"; // Per Excel
+				periodTotalkWh += subdatum.value*1;
+				periodTotalsamples++;
+			}
+	        spnStatus.innerHTML = x;
+			//});
+		//});
+		}
+*/
+
+
+
 	daysData = JSONdata.data.aggregationResult.aggregations[0].results;
-	console.log(JSONdata.data.aggregationResult.aggregations[0].referenceID, JSONdata.data.aggregationResult.aggregations[0].results);
-	console.log(JSONdata.data.aggregationResult.aggregations[1].referenceID, JSONdata.data.aggregationResult.aggregations[1].results);
+//	console.log(JSONdata.data.aggregationResult.aggregations[0].referenceID, JSONdata.data.aggregationResult.aggregations[0].results);
+//	console.log(JSONdata.data.aggregationResult.aggregations[1].referenceID, JSONdata.data.aggregationResult.aggregations[1].results);
 	myChart = new Chart(ctx, myConfig)
 }
+
+
+
 
 function creaLink() {
 	console.log(POD.value, username.value);
@@ -196,7 +276,7 @@ function convertiDataRichiesta(d) {
 	return -1;
 }
 
-function aggiorna() {
+async function aggiorna() {
 	dataUtente = zeri(giorno.value)	+ zeri(mese.value) +	zeri(anno.value);
 	numeroPerData = convertiDataRichiesta(dataUtente);
 	if (numeroPerData < 0) {
@@ -204,6 +284,9 @@ function aggiorna() {
 		return -2;
 	}
 	dayDataRaw = daysData[numeroPerData];
+	firstDay = daysData[0].date;
+	lastDay = daysData[daysData.length-1].date;
+	thisDay = dayDataRaw.date;
 	dayDate = dayDataRaw.date;
 	dayValues = [];
 	minimo = 10000;
@@ -212,7 +295,7 @@ function aggiorna() {
 	totale = 0;
 	conteggio = 0;
 	dayDataRaw.binValues.forEach((objVal) => {
-		dayValues.push(objVal.value);
+		dayValues.push(objVal.value); // per grafico
 		conteggio++;
 		totale += objVal.value;
 		if (objVal.value > massimo) massimo = objVal.value;
@@ -220,28 +303,43 @@ function aggiorna() {
 	});
 	medio = totale/conteggio;
 	calcolaCosti(medio, totale);
-	//dayValues.push(0); // debug
-	//dayValues.push(3.5); // debug
 	myConfig.data.datasets[0].data = dayValues;
 	myChart.update();
-	spn_minimo.innerHTML = minimo.toFixed(2);
-	spn_medio.value = medio.toFixed(2);
-	spn_massimo.innerHTML = massimo.toFixed(2);
-	spn_totale.innerHTML = totale.toFixed(2);
-	spn_costoGmed.innerHTML = costoG_daMedio.toFixed(2);
-	spn_costoGtot.innerHTML = costoG_daTotale.toFixed(2);
-	spn_costoMmed.innerHTML = costoM_daMedio.toFixed(2);
-	spn_costoMtot.innerHTML = costoM_daTotale.toFixed(2);
-	spn_costoAmed.innerHTML = costoA_daMedio.toFixed(2);
-	spn_costoAtot.innerHTML = costoA_daTotale.toFixed(2);
 
-	datiSolari = leggiDatiSolari(lat.value*1, lon.value*1);
-	console.log(datiSolari);
-	showInfo(lat.value*1, lon.value*1, 30, 0.2); // lat, lon, area m2, efficienza
+	spn_minimo.innerHTML = minimo.toFixed(1) + " kWh";
+	spn_medio.value = medio.toFixed(1);
+	spn_massimo.innerHTML = massimo.toFixed(1) + " kWh";
+	spn_totale.innerHTML = totale.toFixed(0) + " kWh";
+
+	spn_costoGmed.innerHTML = costoG_daMedio.toFixed(0) + " Euro";
+	spn_costoMmed.innerHTML = costoM_daMedio.toFixed(0) + " Euro";
+	spn_costoAmed.innerHTML = costoA_daMedio.toFixed(0) + " Euro";
+
+	spn_costoGtot.innerHTML = costoG_daTotale.toFixed(0) + " Euro (" + readableDate(thisDay) + ")";
+//	spn_costoMtot.innerHTML = costoM_daTotale.toFixed(0) + " Euro";
+//	spn_costoAtot.innerHTML = costoA_daTotale.toFixed(0) + " Euro";
+
+	spn_costoTotalePeriodo.innerHTML = costoTotalePeriodo.toFixed(0)  + " Euro (" + readableDate(firstDay) + " - " + readableDate(lastDay) + ")";
+	spn_costoMedioPeriodo.innerHTML = mediaPeriodo.toFixed(0);
+
+	//leggiDatiSolari();
 }
 
-function leggiDatiSolari(latit, longit) {
-	retrieve("https://re.jrc.ec.europa.eu/api/seriescalc?lat=" + latit + "&lon= " + longit + "&outputformat=json&startyear=2005&endyear=2016")
+
+async function leggiDatiSolari() {
+    latit = spnLat.value*1;
+	longi = spnLon.value*1;
+	/*area = spnArea.value*1;
+	efficiency = spnEff.value*1;*/
+	power = spnPotenza.value*1;
+	url = "http://re.jrc.ec.europa.eu/api/PVcalc?lat=" + latit + "&lon=" + longi + "&peakpower=" + power + "&loss=14&outputformat=csv";
+	results = await retrieve(url);
+	console.log(results);
+	solarData.value = results
+}
+
+function readableDate(s) {
+	return s.substr(0,2) + "/" + s.substr(2,2) + "/" + s.substr(4,4);
 }
 
 function calcolaCosti(medio, totale) {
@@ -251,38 +349,40 @@ function calcolaCosti(medio, totale) {
 	costoM_daTotale = costoG_daTotale*30;
 	costoA_daMedio = costoG_daMedio*365;
 	costoA_daTotale = costoG_daTotale*365;
-console.log(costoG_daMedio, costoG_daTotale, costoM_daMedio);
+	costoTotalePeriodo = periodTotalkWh * euk.value;
+	mediaPeriodo = costoTotalePeriodo / (periodTotalsamples/24);
 }
+
 
 function ricalcola() {
 	calcolaCosti(spn_medio.value, totale);
-	spn_costoGmed.innerHTML = costoG_daMedio.toFixed(2);
-	spn_costoGtot.innerHTML = costoG_daTotale.toFixed(2);
-	spn_costoMmed.innerHTML = costoM_daMedio.toFixed(2);
-	spn_costoMtot.innerHTML = costoM_daTotale.toFixed(2);
-	spn_costoAmed.innerHTML = costoA_daMedio.toFixed(2);
-	spn_costoAtot.innerHTML = costoA_daTotale.toFixed(2);
+
+	spn_costoGmed.innerHTML = costoG_daMedio.toFixed(0) + " Euro";
+	spn_costoMmed.innerHTML = costoM_daMedio.toFixed(0) + " Euro";
+	spn_costoAmed.innerHTML = costoA_daMedio.toFixed(0) + " Euro";
+
+//	spn_costoGtot.innerHTML = costoG_daTotale.toFixed(0);
+//	spn_costoMtot.innerHTML = costoM_daTotale.toFixed(0);
+//	spn_costoAtot.innerHTML = costoA_daTotale.toFixed(0);
 }
+
 
 function zeri(v) {
 	if (v<10) {return "0"+v} else return v;
 }
 
-function showInfo(latit, longi ,area, efficiency) {
-	power = area * efficiency;
-	url = "http://re.jrc.ec.europa.eu/api/PVcalc?lat=" + latit + "&lon=" + longi + "&peakpower=" + power + "&loss=14&outputformat=json";
-console.log("url:",url);
-	retrieve(url);
-}
+
+
 
 function retrieve(url, log, output, status) {
 console.log(url, log, output, status);
+return new Promise(resolve => {
 	finalURL = PROXY +	encodeURIComponent(url);
 	var myClient = new XMLHttpRequest();
-	myClient.open('GET',	finalURL);
+	myClient.open('GET',finalURL);
 
 	myClient.onprogress = function(event) {
-		showDownloadProgress(myClient.response.length, status);
+		//showDownloadProgress(myClient.response.length, status);
 	};
 
 	myClient.responseType = 'text';
@@ -292,12 +392,14 @@ console.log(url, log, output, status);
 		if (log) {log.value += "Legacy response received.\n"} else {console.log("Legacy response received.\n")};
 		if (output) {output.value =	response} else {console.log(response)};
 		rawResponse = response.currentTarget.response;
-	beginJSON = rawResponse.indexOf("{");
-	endJSON = rawResponse.length;
-	lenJSON = endJSON - beginJSON + 1;
-		JSONpart = rawResponse.substr(beginJSON, lenJSON);
-console.log(JSON.parse(JSONpart));
-		return JSONpart;
+		validResponse = rawResponse.substr(rawResponse.indexOf("Latitude"), rawResponse.length - rawResponse.indexOf("Latitude") + 1);
+		try {
+			resolve(validResponse);
+		} catch (e) {
+			console.log("Errore nei dati solari da url ", url, e );
+			console.log(rawResponse);
+			resolve ("ERRORE - " + rawResponse);
+		}
 	}
 
 	myClient.onerror = function(event) {
@@ -307,6 +409,7 @@ console.log(JSON.parse(JSONpart));
 	if (log) log.value += "Sending request...\n";
 	myClient.send(); // Async connection to data server.
 	if (log) log.value += "Request sent.\n";
+	});
 }
 
 
