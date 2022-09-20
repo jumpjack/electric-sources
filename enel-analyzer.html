@@ -42,6 +42,12 @@ A: <span id="spn_costoAtot" name="spn_costoAtot"></span><br>
 Output da incollare in spreadsheet:<br>
 <textarea id="outputData" name="outputData" cols = 100 rows = 5></textarea><br>
 <br>
+
+Pagina per dimensionamento pannelli solari a isola: <a href="https://jumpjack.altervista.org/pannelli/dimensionamento.html">Link</a><br>
+"Tool fotovoltaico" ufficiale dell'Unione Europea: <a href="https://re.jrc.ec.europa.eu/pvg_tools/it/">Link</a><br>
+Cliccando su "FV autonoma" si possono inserire i dati del proprio sistema con accumulo e scoprire per quanto tempo durerebbe una determinata batteria, data una determinata potenza dell'impianto:
+<img src="https://user-images.githubusercontent.com/1620953/191217769-885104a7-541b-485e-9e32-e45663f585f2.png"><br>
+<br>
 <hr>
 (*)
 Il link risulta attivo solo dopo che hai effettuato l'accesso alla tua area clienti sul sito <a href="https://www.enel.it/bin/areaclienti/">ENEL energia</a>.<br>
@@ -66,24 +72,31 @@ USER_LENGTH = 9;
 const params = new URLSearchParams(document.location.search);
 const prmPOD = params.get("pod");
 const prmUser = params.get("number");
-//if ((prmPOD != "") && (prmPOD.length == POD_LENGTH)) POD.value = prmPOD;
 
-if (prmPOD != "") {
-	if (prmPOD.length == POD_LENGTH) {
-	POD.value = prmPOD;
+
+if (prmPOD) {
+	if (prmPOD != "") {
+		if (prmPOD.length == POD_LENGTH) {
+		POD.value = prmPOD;
+		} else {
+			alert("ERRORE! Il POD deve essere lungo " + POD_LENGTH + " caratteri, nell'url hai scritto '" + prmPOD + "'")
+		}
 	} else {
-		alert("ERRORE! Il POD deve essere lungo " + POD_LENGTH + " caratteri, nell'url hai scritto '" + prmPOD + "'")
+		// do nothing
 	}
 } else {
 	// do nothing
 }
 
-
-if (prmUser != "") {
-	if (prmUser.length == USER_LENGTH) {
-	username.value = prmUser;
+if (prmUser) {
+	if (prmUser != "") {
+		if (prmUser.length == USER_LENGTH) {
+		username.value = prmUser;
+		} else {
+			alert("ERRORE! Il numero utente deve essere un numero di "+ USER_LENGTH + " cifre,	nell'url hai scritto '" + prmUser + "'")
+		}
 	} else {
-		alert("ERRORE! Il numero utente deve essere un numero di "+ USER_LENGTH + " cifre,	nell'url hai scritto '" + prmUser + "'")
+		// do nothing
 	}
 } else {
 	// do nothing
